@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析报告</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 40px;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+        
+        .report-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .analysis-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+        
+        .personality-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .trait-tag {
+            background: #f0f9f8;
+            color: #4ecdc4;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .interest-list {
+            list-style-type: none;
+            margin-bottom: 20px;
+        }
+        
+        .interest-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .interest-item::before {
+            content: '•';
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .advice-section {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .advice-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .advice-content {
+            color: #666;
+            line-height: 1.7;
+        }
+        
+        .advice-content ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .advice-content li {
+            margin-bottom: 8px;
+        }
+        
+        .share-save {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            transform: translateY(-3px);
+        }
+        
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .share-btn {
+            background: #f0f0f0;
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .share-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-3px);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .report-card {
+                padding: 20px;
+            }
+            
+            .card-title {
+                font-size: 1.3rem;
+            }
+            
+            .share-save {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .share-buttons {
+                justify-content: center;
+            }
+            
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>朋友圈分析报告</h1>
+            <p>基于AI分析的个人洞察和交友建议</p>
+        </header>
+        
+        <div class="report-card">
+            <h2 class="card-title">👤 个人分析</h2>
+            
+            <div class="analysis-section">
+                <h3 class="section-title">性格特点</h3>
+                <div class="personality-traits">
+                    <span class="trait-tag">乐观开朗</span>
+                    <span class="trait-tag">热爱生活</span>
+                    <span class="trait-tag">注重细节</span>
+                    <span class="trait-tag">善于社交</span>
+                    <span class="trait-tag">有幽默感</span>
+                </div>
+            </div>
+            
+            <div class="analysis-section">
+                <h3 class="section-title">兴趣爱好</h3>
+                <ul class="interest-list">
+                    <li class="interest-item">旅行 - 喜欢探索新地方，分享旅行见闻</li>
+                    <li class="interest-item">美食 - 热衷于尝试各种美食，分享探店体验</li>
+                    <li class="interest-item">健身 - 定期锻炼，注重身体健康</li>
+                    <li class="interest-item">阅读 - 喜欢阅读各类书籍，分享读书感悟</li>
+                    <li class="interest-item">摄影 - 喜欢用镜头记录生活中的美好瞬间</li>
+                </ul>
+            </div>
+            
+            <div class="analysis-section">
+                <h3 class="section-title">生活方式</h3>
+                <p>生活规律，注重品质，喜欢尝试新鲜事物。善于平衡工作和生活，周末喜欢和朋友聚会或进行户外活动。对时尚有一定的追求，注重个人形象。</p>
+            </div>
+            
+            <div class="analysis-section">
+                <h3 class="section-title">社交偏好</h3>
+                <p>喜欢和朋友保持联系，经常在朋友圈分享生活点滴。注重朋友间的互动，会积极回应他人的动态。倾向于与志同道合的人交往，看重真诚和默契。</p>
+            </div>
+        </div>
+        
+        <div class="report-card">
+            <h2 class="card-title">💖 交友建议</h2>
+            
+            <div class="advice-section">
+                <h3 class="advice-title">话题推荐</h3>
+                <div class="advice-content">
+                    <ul>
+                        <li>旅行经历：分享自己的旅行故事，询问对方的旅行计划</li>
+                        <li>美食探索：讨论喜欢的美食类型，推荐好吃的餐厅</li>
+                        <li>健身心得：交流健身经验和技巧，邀请一起运动</li>
+                        <li>读书感悟：分享最近读的好书，交流读书心得</li>
+                        <li>摄影技巧：讨论摄影爱好，分享彼此的作品</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="advice-section">
+                <h3 class="advice-title">约会建议</h3>
+                <div class="advice-content">
+                    <ul>
+                        <li>初次约会：选择环境舒适的咖啡馆或餐厅，氛围轻松愉快</li>
+                        <li>后续约会：可以安排户外活动，如公园散步、爬山或骑行</li>
+                        <li>特别安排：根据对方兴趣，策划主题约会，如美食之旅或摄影外拍</li>
+                        <li>礼物选择：可以送一本好书、精致的小物件或与对方兴趣相关的礼物</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="advice-section">
+                <h3 class="advice-title">沟通技巧</h3>
+                <div class="advice-content">
+                    <ul>
+                        <li>积极倾听：认真听对方说话，给予适当的回应</li>
+                        <li>分享经历：主动分享自己的生活和想法，促进彼此了解</li>
+                        <li>幽默表达：适当运用幽默，增加聊天的趣味性</li>
+                        <li>尊重差异：理解并尊重对方的观点和生活方式</li>
+                        <li>真诚赞美：及时表达对对方的欣赏和赞美</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="advice-section">
+                <h3 class="advice-title">关系进展</h3>
+                <div class="advice-content">
+                    <p>基于对方的性格特点和兴趣爱好，建议采取渐进式的关系发展策略。从朋友做起，通过共同兴趣建立连接，逐步加深了解。在适当的时候表达好感，避免过于急切的态度。尊重对方的节奏，给彼此足够的空间和时间。</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="share-save">
+            <div class="share-buttons">
+                <button class="share-btn" onclick="shareReport('wechat')">微信分享</button>
+                <button class="share-btn" onclick="shareReport('weibo')">微博分享</button>
+                <button class="share-btn" onclick="saveReport()">保存报告</button>
+            </div>
+            <button class="btn btn-primary" onclick="goHome()">返回首页</button>
+        </div>
+        
+        <footer class="footer">
+            <p>© 2026 朋友圈分析交友助手 | 分析结果仅供参考</p>
+        </footer>
+    </div>
+    
+    <script>
+        function shareReport(platform) {
+            alert(`分享到${platform}功能开发中`);
+        }
+        
+        function saveReport() {
+            alert('保存报告功能开发中');
+        }
+        
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>朋友圈分析交友助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 40px;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .instructions {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            color: #666;
+        }
+        
+        .upload-area {
+            background: white;
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #ff6b6b;
+            background-color: #f9f9f9;
+        }
+        
+        .upload-area.dragover {
+            border-color: #4ecdc4;
+            background-color: #f0f9f8;
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .upload-subtext {
+            font-size: 0.9rem;
+            color: #999;
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .image-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            aspect-ratio: 1;
+        }
+        
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .image-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-btn:hover {
+            background: rgba(255, 107, 107, 1);
+            transform: scale(1.1);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .image-count {
+            font-size: 1rem;
+            color: #666;
+        }
+        
+        .error-message {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .analysis-section {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .loading-animation {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #f3f3f3;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 30px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .report-section {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .report-section h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .report-section h2 i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .analysis-item {
+            margin-bottom: 30px;
+        }
+        
+        .analysis-item h3 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+        
+        .personality-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .trait-tag {
+            background: #f0f9f8;
+            color: #4ecdc4;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .interest-list {
+            list-style-type: none;
+            margin-bottom: 20px;
+        }
+        
+        .interest-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .interest-item::before {
+            content: '•';
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .advice-section {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .advice-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .advice-content {
+            color: #666;
+            line-height: 1.7;
+        }
+        
+        .advice-content ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .advice-content li {
+            margin-bottom: 8px;
+        }
+        
+        .share-save {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .share-btn {
+            background: #f0f0f0;
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .share-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-3px);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .upload-area {
+                padding: 40px 15px;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .share-save {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .share-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>朋友圈分析交友助手</h1>
+            <p class="subtitle">上传朋友圈截图，AI为你分析对方，助你快速建立关系</p>
+        </header>
+        
+        <div class="instructions">
+            <h3>使用说明：</h3>
+            <ul>
+                <li>至少上传5张朋友圈截图</li>
+                <li>图片格式支持：JPG、PNG、WEBP</li>
+                <li>每张图片大小不超过10MB</li>
+                <li>确保图片清晰可见，包含完整的朋友圈内容</li>
+            </ul>
+        </div>
+        
+        <div class="error-message" id="errorMessage"></div>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">点击或拖拽图片到此处上传</div>
+            <div class="upload-subtext">支持批量上传</div>
+            <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+        </div>
+        
+        <div class="image-grid" id="imageGrid">
+            <!-- 上传的图片将在这里显示 -->
+        </div>
+        
+        <div class="controls">
+            <div class="image-count" id="imageCount">已上传：0/5</div>
+            <button class="btn btn-primary" id="analyzeBtn" disabled onclick="startAnalysis()">开始分析</button>
+        </div>
+        
+        <div class="analysis-section" id="analysisSection">
+            <h2>分析中...</h2>
+            <div class="loading-animation">
+                <div class="spinner"></div>
+                <p>正在分析朋友圈内容，请稍候...</p>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p id="estimatedTime">预计剩余时间：15秒</p>
+        </div>
+        
+        <div class="report-section" id="reportSection">
+            <h2>👤 分析报告</h2>
+            
+            <div class="analysis-item">
+                <h3>性格特点</h3>
+                <div class="personality-traits" id="personalityTraits">
+                    <!-- 性格标签将在这里显示 -->
+                </div>
+            </div>
+            
+            <div class="analysis-item">
+                <h3>兴趣爱好</h3>
+                <ul class="interest-list" id="interestList">
+                    <!-- 兴趣爱好将在这里显示 -->
+                </ul>
+            </div>
+            
+            <div class="analysis-item">
+                <h3>生活方式</h3>
+                <p id="lifestyle">
+                    <!-- 生活方式将在这里显示 -->
+                </p>
+            </div>
+            
+            <div class="analysis-item">
+                <h3>社交偏好</h3>
+                <p id="socialPreference">
+                    <!-- 社交偏好将在这里显示 -->
+                </p>
+            </div>
+            
+            <div class="analysis-item">
+                <h3>💖 交友建议</h3>
+                
+                <div class="advice-section">
+                    <h4 class="advice-title">话题推荐</h4>
+                    <div class="advice-content">
+                        <ul id="topicAdvice">
+                            <!-- 话题推荐将在这里显示 -->
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="advice-section">
+                    <h4 class="advice-title">约会建议</h4>
+                    <div class="advice-content">
+                        <ul id="datingAdvice">
+                            <!-- 约会建议将在这里显示 -->
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="advice-section">
+                    <h4 class="advice-title">沟通技巧</h4>
+                    <div class="advice-content">
+                        <ul id="communicationAdvice">
+                            <!-- 沟通技巧将在这里显示 -->
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="advice-section">
+                    <h4 class="advice-title">关系进展</h4>
+                    <div class="advice-content">
+                        <p id="relationshipAdvice">
+                            <!-- 关系进展建议将在这里显示 -->
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="share-save">
+                <div class="share-buttons">
+                    <button class="share-btn" onclick="shareReport('wechat')">微信分享</button>
+                    <button class="share-btn" onclick="shareReport('weibo')">微博分享</button>
+                    <button class="share-btn" onclick="saveReport()">保存报告</button>
+                </div>
+                <button class="btn btn-primary" onclick="resetForm()">重新分析</button>
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <p>© 2026 朋友圈分析交友助手 | 保护用户隐私，安全可靠</p>
+        </footer>
+    </div>
+    
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const imageGrid = document.getElementById('imageGrid');
+        const imageCount = document.getElementById('imageCount');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const analysisSection = document.getElementById('analysisSection');
+        const reportSection = document.getElementById('reportSection');
+        const progressFill = document.getElementById('progressFill');
+        const estimatedTime = document.getElementById('estimatedTime');
+        
+        let uploadedImages = [];
+        
+        // 点击上传区域触发文件选择
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // 拖拽上传功能
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+        
+        // 文件选择事件
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFiles(e.target.files);
+            }
+        });
+        
+        // 处理上传的文件
+        function handleFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // 检查文件类型
+                if (!file.type.startsWith('image/')) {
+                    showError('请上传图片文件');
+                    continue;
+                }
+                
+                // 检查文件大小
+                if (file.size > 10 * 1024 * 1024) {
+                    showError('图片大小不能超过10MB');
+                    continue;
+                }
+                
+                // 读取并预览图片
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageUrl = e.target.result;
+                    uploadedImages.push({ file, url: imageUrl });
+                    updateImageGrid();
+                    updateImageCount();
+                    updateAnalyzeButton();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // 更新图片网格
+        function updateImageGrid() {
+            imageGrid.innerHTML = '';
+            
+            uploadedImages.forEach((image, index) => {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'image-item';
+                imageItem.innerHTML = `
+                    <img src="${image.url}" alt="朋友圈截图 ${index + 1}">
+                    <button class="delete-btn" onclick="deleteImage(${index})">×</button>
+                `;
+                imageGrid.appendChild(imageItem);
+            });
+        }
+        
+        // 更新图片计数
+        function updateImageCount() {
+            imageCount.textContent = `已上传：${uploadedImages.length}/5`;
+        }
+        
+        // 更新分析按钮状态
+        function updateAnalyzeButton() {
+            analyzeBtn.disabled = uploadedImages.length < 5;
+        }
+        
+        // 删除图片
+        function deleteImage(index) {
+            uploadedImages.splice(index, 1);
+            updateImageGrid();
+            updateImageCount();
+            updateAnalyzeButton();
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            // 3秒后隐藏错误信息
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 开始分析
+        function startAnalysis() {
+            if (uploadedImages.length < 5) {
+                showError('请至少上传5张图片');
+                return;
+            }
+            
+            // 显示分析中界面
+            uploadArea.style.display = 'none';
+            imageGrid.style.display = 'none';
+            document.querySelector('.controls').style.display = 'none';
+            analysisSection.style.display = 'block';
+            
+            // 模拟分析进度
+            let progress = 0;
+            const totalTime = 15000; // 15秒
+            const interval = 100;
+            const step = 100 / (totalTime / interval);
+            
+            const timer = setInterval(() => {
+                progress += step;
+                if (progress > 100) progress = 100;
+                
+                progressFill.style.width = progress + '%';
+                const remainingTime = Math.max(0, Math.round((100 - progress) / 100 * totalTime / 1000));
+                estimatedTime.textContent = `预计剩余时间：${remainingTime}秒`;
+                
+                if (progress >= 100) {
+                    clearInterval(timer);
+                    // 模拟分析完成，显示报告
+                    setTimeout(() => {
+                        analysisSection.style.display = 'none';
+                        reportSection.style.display = 'block';
+                        // 加载模拟数据
+                        loadMockData();
+                    }, 500);
+                }
+            }, interval);
+            
+            // 实际项目中，这里会发送图片到后端进行分析
+            // uploadImagesToServer();
+        }
+        
+        // 上传图片到服务器
+        function uploadImagesToServer() {
+            const formData = new FormData();
+            
+            uploadedImages.forEach((image, index) => {
+                formData.append('images', image.file, `image_${index}.jpg`);
+            });
+            
+            fetch('http://localhost:3001/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === '图片上传成功') {
+                    // 调用分析接口
+                    analyzeImages(data.files);
+                } else {
+                    showError('图片上传失败：' + data.error);
+                    resetForm();
+                }
+            })
+            .catch(error => {
+                console.error('上传错误:', error);
+                showError('上传失败，请重试');
+                resetForm();
+            });
+        }
+        
+        // 分析图片
+        function analyzeImages(files) {
+            fetch('http://localhost:3001/api/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ files })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === '分析完成') {
+                    // 显示分析结果
+                    displayReport(data.result);
+                } else {
+                    showError('分析失败：' + data.error);
+                    resetForm();
+                }
+            })
+            .catch(error => {
+                console.error('分析错误:', error);
+                showError('分析失败，请重试');
+                resetForm();
+            });
+        }
+        
+        // 显示分析报告
+        function displayReport(result) {
+            // 填充性格特点
+            const personalityTraits = document.getElementById('personalityTraits');
+            personalityTraits.innerHTML = '';
+            result.personality.forEach(trait => {
+                const traitTag = document.createElement('span');
+                traitTag.className = 'trait-tag';
+                traitTag.textContent = trait;
+                personalityTraits.appendChild(traitTag);
+            });
+            
+            // 填充兴趣爱好
+            const interestList = document.getElementById('interestList');
+            interestList.innerHTML = '';
+            result.interests.forEach(interest => {
+                const li = document.createElement('li');
+                li.className = 'interest-item';
+                li.textContent = `${interest.name} - ${interest.description}`;
+                interestList.appendChild(li);
+            });
+            
+            // 填充生活方式
+            document.getElementById('lifestyle').textContent = result.lifestyle;
+            
+            // 填充社交偏好
+            document.getElementById('socialPreference').textContent = result.socialPreference;
+            
+            // 填充交友建议
+            const topicAdvice = document.getElementById('topicAdvice');
+            topicAdvice.innerHTML = '';
+            result.advice.topics.forEach(topic => {
+                const li = document.createElement('li');
+                li.textContent = topic;
+                topicAdvice.appendChild(li);
+            });
+            
+            const datingAdvice = document.getElementById('datingAdvice');
+            datingAdvice.innerHTML = '';
+            result.advice.dating.forEach(advice => {
+                const li = document.createElement('li');
+                li.textContent = advice;
+                datingAdvice.appendChild(li);
+            });
+            
+            const communicationAdvice = document.getElementById('communicationAdvice');
+            communicationAdvice.innerHTML = '';
+            result.advice.communication.forEach(advice => {
+                const li = document.createElement('li');
+                li.textContent = advice;
+                communicationAdvice.appendChild(li);
+            });
+            
+            document.getElementById('relationshipAdvice').textContent = result.advice.relationship;
+            
+            // 显示报告区域
+            analysisSection.style.display = 'none';
+            reportSection.style.display = 'block';
+        }
+        
+        // 加载模拟数据
+        function loadMockData() {
+            const mockData = {
+                personality: ['乐观开朗', '热爱生活', '注重细节', '善于社交', '有幽默感'],
+                interests: [
+                    { name: '旅行', description: '喜欢探索新地方，分享旅行见闻' },
+                    { name: '美食', description: '热衷于尝试各种美食，分享探店体验' },
+                    { name: '健身', description: '定期锻炼，注重身体健康' },
+                    { name: '阅读', description: '喜欢阅读各类书籍，分享读书感悟' },
+                    { name: '摄影', description: '喜欢用镜头记录生活中的美好瞬间' }
+                ],
+                lifestyle: '生活规律，注重品质，喜欢尝试新鲜事物。善于平衡工作和生活，周末喜欢和朋友聚会或进行户外活动。对时尚有一定的追求，注重个人形象。',
+                socialPreference: '喜欢和朋友保持联系，经常在朋友圈分享生活点滴。注重朋友间的互动，会积极回应他人的动态。倾向于与志同道合的人交往，看重真诚和默契。',
+                advice: {
+                    topics: [
+                        '旅行经历：分享自己的旅行故事，询问对方的旅行计划',
+                        '美食探索：讨论喜欢的美食类型，推荐好吃的餐厅',
+                        '健身心得：交流健身经验和技巧，邀请一起运动',
+                        '读书感悟：分享最近读的好书，交流读书心得',
+                        '摄影技巧：讨论摄影爱好，分享彼此的作品'
+                    ],
+                    dating: [
+                        '初次约会：选择环境舒适的咖啡馆或餐厅，氛围轻松愉快',
+                        '后续约会：可以安排户外活动，如公园散步、爬山或骑行',
+                        '特别安排：根据对方兴趣，策划主题约会，如美食之旅或摄影外拍',
+                        '礼物选择：可以送一本好书、精致的小物件或与对方兴趣相关的礼物'
+                    ],
+                    communication: [
+                        '积极倾听：认真听对方说话，给予适当的回应',
+                        '分享经历：主动分享自己的生活和想法，促进彼此了解',
+                        '幽默表达：适当运用幽默，增加聊天的趣味性',
+                        '尊重差异：理解并尊重对方的观点和生活方式',
+                        '真诚赞美：及时表达对对方的欣赏和赞美'
+                    ],
+                    relationship: '基于对方的性格特点和兴趣爱好，建议采取渐进式的关系发展策略。从朋友做起，通过共同兴趣建立连接，逐步加深了解。在适当的时候表达好感，避免过于急切的态度。尊重对方的节奏，给彼此足够的空间和时间。'
+                }
+            };
+            
+            displayReport(mockData);
+        }
+        
+        // 分享报告
+        function shareReport(platform) {
+            alert(`分享到${platform}功能开发中`);
+        }
+        
+        // 保存报告
+        function saveReport() {
+            alert('保存报告功能开发中');
+        }
+        
+        // 重置表单
+        function resetForm() {
+            uploadedImages = [];
+            updateImageGrid();
+            updateImageCount();
+            updateAnalyzeButton();
+            
+            uploadArea.style.display = 'block';
+            imageGrid.style.display = 'block';
+            document.querySelector('.controls').style.display = 'block';
+            analysisSection.style.display = 'none';
+            reportSection.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

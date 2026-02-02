@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传朋友圈截图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 40px;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+        
+        .instructions {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            color: #666;
+        }
+        
+        .upload-area {
+            background: white;
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #ff6b6b;
+            background-color: #f9f9f9;
+        }
+        
+        .upload-area.dragover {
+            border-color: #4ecdc4;
+            background-color: #f0f9f8;
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .upload-subtext {
+            font-size: 0.9rem;
+            color: #999;
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .image-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            aspect-ratio: 1;
+        }
+        
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .image-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-btn:hover {
+            background: rgba(255, 107, 107, 1);
+            transform: scale(1.1);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            transform: translateY(-3px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .image-count {
+            font-size: 1rem;
+            color: #666;
+        }
+        
+        .error-message {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .upload-area {
+                padding: 40px 15px;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>上传朋友圈截图</h1>
+            <p>请上传至少5张对方的朋友圈截图，以便AI进行全面分析</p>
+        </header>
+        
+        <section class="instructions">
+            <h3>上传要求：</h3>
+            <ul>
+                <li>至少上传5张朋友圈截图</li>
+                <li>图片格式支持：JPG、PNG、WEBP</li>
+                <li>每张图片大小不超过10MB</li>
+                <li>确保图片清晰可见，包含完整的朋友圈内容</li>
+            </ul>
+        </section>
+        
+        <div class="error-message" id="errorMessage"></div>
+        
+        <section class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">点击或拖拽图片到此处上传</div>
+            <div class="upload-subtext">支持批量上传</div>
+            <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+        </section>
+        
+        <section class="image-grid" id="imageGrid">
+            <!-- 上传的图片将在这里显示 -->
+        </section>
+        
+        <section class="controls">
+            <div class="image-count" id="imageCount">已上传：0/5</div>
+            <div>
+                <button class="btn btn-secondary" onclick="goBack()">返回首页</button>
+                <button class="btn btn-primary" id="analyzeBtn" disabled onclick="startAnalysis()">开始分析</button>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const imageGrid = document.getElementById('imageGrid');
+        const imageCount = document.getElementById('imageCount');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        let uploadedImages = [];
+        
+        // 点击上传区域触发文件选择
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // 拖拽上传功能
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+        
+        // 文件选择事件
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFiles(e.target.files);
+            }
+        });
+        
+        // 处理上传的文件
+        function handleFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // 检查文件类型
+                if (!file.type.startsWith('image/')) {
+                    showError('请上传图片文件');
+                    continue;
+                }
+                
+                // 检查文件大小
+                if (file.size > 10 * 1024 * 1024) {
+                    showError('图片大小不能超过10MB');
+                    continue;
+                }
+                
+                // 读取并预览图片
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageUrl = e.target.result;
+                    uploadedImages.push({ file, url: imageUrl });
+                    updateImageGrid();
+                    updateImageCount();
+                    updateAnalyzeButton();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // 更新图片网格
+        function updateImageGrid() {
+            imageGrid.innerHTML = '';
+            
+            uploadedImages.forEach((image, index) => {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'image-item';
+                imageItem.innerHTML = `
+                    <img src="${image.url}" alt="朋友圈截图 ${index + 1}">
+                    <button class="delete-btn" onclick="deleteImage(${index})">×</button>
+                `;
+                imageGrid.appendChild(imageItem);
+            });
+        }
+        
+        // 更新图片计数
+        function updateImageCount() {
+            imageCount.textContent = `已上传：${uploadedImages.length}/5`;
+        }
+        
+        // 更新分析按钮状态
+        function updateAnalyzeButton() {
+            analyzeBtn.disabled = uploadedImages.length < 5;
+        }
+        
+        // 删除图片
+        function deleteImage(index) {
+            uploadedImages.splice(index, 1);
+            updateImageGrid();
+            updateImageCount();
+            updateAnalyzeButton();
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            // 3秒后隐藏错误信息
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 返回首页
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        // 开始分析
+        function startAnalysis() {
+            if (uploadedImages.length < 5) {
+                showError('请至少上传5张图片');
+                return;
+            }
+            
+            // 模拟上传和分析过程
+            // 实际项目中，这里会将图片发送到后端进行处理
+            window.location.href = 'analyze.html';
+        }
+    </script>
+</body>
+</html>

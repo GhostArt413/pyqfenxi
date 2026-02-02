@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI分析中</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 30px;
+        }
+        
+        .loading-animation {
+            margin: 40px 0;
+        }
+        
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #f3f3f3;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 30px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .analysis-steps {
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active {
+            background: #f0f9f8;
+            border-left: 4px solid #4ecdc4;
+        }
+        
+        .step-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .step.active .step-icon {
+            background: #4ecdc4;
+            color: white;
+        }
+        
+        .step-text {
+            flex: 1;
+            color: #666;
+        }
+        
+        .step.active .step-text {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .step-status {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .step.active .step-status {
+            color: #4ecdc4;
+        }
+        
+        .estimated-time {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .spinner {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI分析中</h1>
+        <p>正在分析朋友圈内容，请稍候...</p>
+        
+        <div class="loading-animation">
+            <div class="spinner"></div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div class="analysis-steps">
+            <div class="step active" id="step1">
+                <div class="step-icon">1</div>
+                <div class="step-text">图片预处理</div>
+                <div class="step-status">进行中</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-icon">2</div>
+                <div class="step-text">内容提取</div>
+                <div class="step-status">等待中</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-icon">3</div>
+                <div class="step-text">特征分析</div>
+                <div class="step-status">等待中</div>
+            </div>
+            <div class="step" id="step4">
+                <div class="step-icon">4</div>
+                <div class="step-text">报告生成</div>
+                <div class="step-status">等待中</div>
+            </div>
+        </div>
+        
+        <div class="estimated-time" id="estimatedTime">预计剩余时间：15秒</div>
+    </div>
+    
+    <script>
+        let progress = 0;
+        let currentStep = 1;
+        const totalSteps = 4;
+        const totalTime = 15000; // 15秒
+        const stepTime = totalTime / totalSteps;
+        
+        function updateProgress() {
+            progress += (100 / totalSteps) / (stepTime / 100);
+            if (progress > 100) progress = 100;
+            
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            const remainingTime = Math.max(0, Math.round((100 - progress) / 100 * totalTime / 1000));
+            document.getElementById('estimatedTime').textContent = `预计剩余时间：${remainingTime}秒`;
+            
+            if (progress >= currentStep * (100 / totalSteps)) {
+                updateStep();
+            }
+            
+            if (progress < 100) {
+                setTimeout(updateProgress, 100);
+            } else {
+                // 分析完成，跳转到报告页面
+                setTimeout(() => {
+                    window.location.href = 'report.html';
+                }, 500);
+            }
+        }
+        
+        function updateStep() {
+            if (currentStep <= totalSteps) {
+                // 标记当前步骤为完成
+                const currentStepElement = document.getElementById(`step${currentStep}`);
+                if (currentStepElement) {
+                    currentStepElement.classList.remove('active');
+                    currentStepElement.querySelector('.step-status').textContent = '完成';
+                    currentStepElement.querySelector('.step-icon').textContent = '✓';
+                }
+                
+                // 标记下一个步骤为进行中
+                currentStep++;
+                if (currentStep <= totalSteps) {
+                    const nextStepElement = document.getElementById(`step${currentStep}`);
+                    if (nextStepElement) {
+                        nextStepElement.classList.add('active');
+                        nextStepElement.querySelector('.step-status').textContent = '进行中';
+                    }
+                }
+            }
+        }
+        
+        // 开始更新进度
+        updateProgress();
+    </script>
+</body>
+</html>
